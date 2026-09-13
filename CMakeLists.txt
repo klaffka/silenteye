@@ -144,7 +144,10 @@ ENDIF(APPLE)
 
 # Qt6 framework
 find_package(Qt6 COMPONENTS Core Gui Widgets Network Concurrent Multimedia Core5Compat REQUIRED)
-find_package(Qca-qt6 2.3 REQUIRED)
+# QCA (Qt6) is only required to build the cryptography plug-ins
+IF($ENV{ENABLE_MODULE})
+  find_package(Qca-qt6 2.3 REQUIRED)
+ENDIF($ENV{ENABLE_MODULE})
 
 # Set the compilation parameters
 # Workaround for an incomplete CommandLineTools libc++ install: when the

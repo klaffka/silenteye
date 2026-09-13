@@ -68,14 +68,15 @@ jobs:
 
           echo "::group::plain message round-trip"
           "$BIN" --batch encode "$WORK/test.bmp" --message "ci-plain-ok" --confpath "$CONF"
-          "$BIN" --batch decode "$OUT/test.bmp" --confpath "$CONF" | tee "$WORK/decode.log"
-          grep -q "ci-plain-ok" "$WORK/decode.log"
+          "$BIN" --batch decode "$OUT/test.bmp" --confpath "$CONF" 2>&1 | tee "$WORK/decode.log"
+          grep -q "Decoded message: ci-plain-ok" "$WORK/decode.log"
           echo "::endgroup::"
 
           echo "::group::AES256 encrypted round-trip"
+          rm -f "$OUT/test.bmp"
           "$BIN" --batch encode "$WORK/test.bmp" --message "ci-secret-ok" --password "s3cr3t" --confpath "$CONF"
-          "$BIN" --batch decode "$OUT/test.bmp" --password "s3cr3t" --confpath "$CONF" | tee "$WORK/decode2.log"
-          grep -q "ci-secret-ok" "$WORK/decode2.log"
+          "$BIN" --batch decode "$OUT/test.bmp" --password "s3cr3t" --confpath "$CONF" 2>&1 | tee "$WORK/decode2.log"
+          grep -q "Decoded message: ci-secret-ok" "$WORK/decode2.log"
           echo "::endgroup::"
 
   # ---------------------------------------------------------------------------
