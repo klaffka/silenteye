@@ -21,30 +21,22 @@ namespace SECryptoAES256 {
     {
         this->setObjectName("SECryptoAES256");
         m_logger = new Logger(this);
-        m_init = NULL;
         m_isQcaCompatible = false;
 
     }
 
     SECryptoAES256Module::~SECryptoAES256Module()
     {
-        if (m_init != NULL)
-            delete m_init;
         delete m_logger;
     }
 
     void SECryptoAES256Module::init()
     {
-        if( m_init != NULL)
-            return;
-        m_init = new QCA::Initializer;
-
         m_isQcaCompatible = QCA::isSupported("aes256-cbc-pkcs7");
 
         if( m_isQcaCompatible )
         {
             m_logger->info(name() + ": aes256-cbc-pkcs7 supported by system [OK]");
-            m_key = QCA::SymmetricKey( QString(name()+"%/.?!:;]{[}&").toUtf8() );
         }
         else
         {
@@ -71,6 +63,7 @@ namespace SECryptoAES256 {
 
     QString SECryptoAES256Module::status()
     {
+        QCA::Initializer qcaInit;
         init();
         if(m_isQcaCompatible)
             return "OK|aes256-cbc-pkcs7 supported by system";
@@ -98,11 +91,13 @@ namespace SECryptoAES256 {
 
     QPointer<EncodedData> SECryptoAES256Module::encode(QString key, QPointer<EncodedData> msg)
     {
+        QCA::Initializer qcaInit;
         init();
         if(!m_isQcaCompatible){
             throw ModuleException("aes256-cbc-pkcs7 is not supported by the system.");
         }
 
+        QCA::SymmetricKey cipherKey( QString(name()+"%/.?!:;]{[}&").toUtf8() );
         QCA::InitializationVector iv = initializationVector(key);
 
         // create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
@@ -111,7 +106,7 @@ namespace SECryptoAES256 {
                            QCA::Cipher::DefaultPadding,
                            // this object will encrypt
                            QCA::Encode,
-                           m_key, iv);
+                           cipherKey, iv);
 
         // we use the cipher object to encrypt the argument we passed in
         // the result of that is returned - note that if there is less than
@@ -139,11 +134,13 @@ namespace SECryptoAES256 {
 
     QPointer<EncodedData> SECryptoAES256Module::decode(QString key, QPointer<EncodedData> data)
     {
+        QCA::Initializer qcaInit;
         init();
         if(!m_isQcaCompatible){
             throw ModuleException("aes256-cbc-pkcs7 is not supported by the system.");
         }
 
+        QCA::SymmetricKey cipherKey( QString(name()+"%/.?!:;]{[}&").toUtf8() );
         QCA::InitializationVector iv = initializationVector(key);
 
         // create a 128 bit AES cipher object using Cipher Block Chaining (CBC) mode
@@ -152,7 +149,7 @@ namespace SECryptoAES256 {
                            QCA::Cipher::DefaultPadding,
                            // this object will encrypt
                            QCA::Decode,
-                           m_key, iv);
+                           cipherKey, iv);
 
         // take that cipher text, and decrypt it
         QCA::SecureArray plainText = cipher.update( QCA::SecureArray(data->toData()->data()) );
@@ -170,7 +167,16 @@ namespace SECryptoAES256 {
             throw ModuleException("An error occured during the decryption process. (wrong password key?)",
                                   "An error occured during the finalization of the cipher !");
 
-        QPointer<EncodedData> result = new EncodedData(plainText.toByteArray(), Data::F_UNDEF, false);
+        QByteArray plain = plainText.toByteArray();
+        // The encrypted payload may be wrapped in a qCompress envelope
+        // ([4-byte big-endian size][zlib stream]) when compression was enabled
+        // before encryption. Its leading byte is not a valid format marker,
+        // so unwrap the envelope before handing it over to EncodedData.
+        QPointer<EncodedData> result;
+        if (plain.size() > 5 && plain.at(0) == '\0' && (uchar)plain.at(4) == 0x78)
+            result = new EncodedData(qUncompress(plain), Data::F_UNDEF, false);
+        else
+            result = new EncodedData(plain, Data::F_UNDEF, false);
         if(result->format() != Data::FILE)
             m_logger->debug("aes256 decryption of " + QCA::arrayToHex(data->toData()->data()) + " is "  + result->toString());
 

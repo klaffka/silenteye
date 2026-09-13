@@ -24,6 +24,7 @@ namespace SilentEye {
 
     Logger ModuleManager::m_logger("ModuleManager");
     QList<ModuleInterface*> ModuleManager::m_modulesList;
+    QList<QPluginLoader*> ModuleManager::m_loaders;
     QMap< ModuleManager::Category, QMap<QString, ModuleInterface*> > 
             ModuleManager::m_modulesMap;
     QMap<QString, ModuleInterface*> ModuleManager::m_emptyMap;
@@ -122,6 +123,24 @@ namespace SilentEye {
         return 0;
     }
 
+    //! Unload every plug-in (must be called before the application exits)
+    /*! Destroying the plug-in instances and unloading their libraries explicitly
+        avoids crash-prone static destruction ordering issues at exit. */
+    void ModuleManager::unload()
+    {
+        m_modulesMap.clear();
+        m_modulesList.clear();
+        foreach (QPluginLoader* loader, m_loaders)
+        {
+            QObject* plugin = loader->instance();
+            if (plugin)
+                delete plugin;
+            loader->unload();
+            delete loader;
+        }
+        m_loaders.clear();
+    }
+
     //! Load SilentEye's plug-ins (modules)
     void ModuleManager::load()
     {
@@ -149,10 +168,11 @@ namespace SilentEye {
 	        m_logger.warning(fileName + " is not a loadable library!");
                 continue;
             }
-            QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
+            QPluginLoader* loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
             m_logger.debug("Loading module " + fileName + "...");
-            QObject *plugin = loader.instance();
-            loadPlugin(plugin, "[" + fileName + "]" + loader.errorString());
+            QObject *plugin = loader->instance();
+            m_loaders.append(loader);
+            loadPlugin(plugin, "[" + fileName + "]" + loader->errorString());
         }
     }
 

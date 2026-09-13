@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
             i = i-2;
         } else if (arguments.at(i) == "--password") {
             arguments.removeAt(i);
-            if (i >= arguments.size() || !QFile::exists(arguments.at(i))) {
+            if (i >= arguments.size() || arguments.at(i).startsWith("--")) {
                 showMessage("You must specify a text after --password option", NULL, !batch_mode);
                 return 7;
             }
@@ -197,7 +197,9 @@ int main(int argc, char *argv[])
 
         MainWindow mainWin;
         mainWin.show();
-        return app.exec();
+        int return_code = app.exec();
+        ModuleManager::unload();
+        return return_code;
     }
     else
     {
@@ -235,7 +237,9 @@ int main(int argc, char *argv[])
 
             MainWindow mainWin(filePath);
             mainWin.show();
-            return app.exec();
+            int dialog_code = app.exec();
+            ModuleManager::unload();
+            return dialog_code;
         }
 
         // Load Media
@@ -265,13 +269,14 @@ int main(int argc, char *argv[])
             logger.info("Running in batch mode");
             if (action == "encode") {
                 if (message_text != "")
-                    return ModuleCommander::encode(md, message_text, password, Controller::instance()->config.getBool("compressdata"));
+                    return_code = ModuleCommander::encode(md, message_text, password, Controller::instance()->config.getBool("compressdata"));
                 else
-                    return ModuleCommander::encode(md, new QFile(message_file_path), password, Controller::instance()->config.getBool("compressdata"));
+                    return_code = ModuleCommander::encode(md, new QFile(message_file_path), password, Controller::instance()->config.getBool("compressdata"));
             } else if(action == "decode") {
-                return ModuleCommander::decode(md, password, Controller::instance()->config.getBool("compressdata"));
+                return_code = ModuleCommander::decode(md, password, Controller::instance()->config.getBool("compressdata"));
             } else {
                 showMessage("Specified action not recognised: " + action, &logger, !batch_mode);
+                ModuleManager::unload();
                 return 3;
             }
         } else {
@@ -289,6 +294,7 @@ int main(int argc, char *argv[])
                 dialog = new DecodeDialog();
             } else {
                 showMessage("Specified action not recognised: " + action, &logger, !batch_mode);
+                ModuleManager::unload();
                 return 3;
             }
 
@@ -298,6 +304,7 @@ int main(int argc, char *argv[])
             return_code = dialog->exec();
             delete dialog;
         }
+        ModuleManager::unload();
         return return_code;
     }
 }

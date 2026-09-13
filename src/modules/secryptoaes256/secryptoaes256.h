@@ -40,8 +40,6 @@ namespace SECryptoAES256 {
     private:
         QPointer<Logger> m_logger;
         bool m_isQcaCompatible;
-        QCA::SymmetricKey m_key;
-        QCA::Initializer* m_init;
 
     public:
         SECryptoAES256Module();

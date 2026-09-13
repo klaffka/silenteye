@@ -65,6 +65,19 @@ The application bundle is created at `build-arm64/silenteye.app`. To run batch m
 build-arm64/silenteye.app/Contents/MacOS/silenteye --help
 ```
 
+Note: the batch encoder picks the format module from `silenteye.conf`
+(`imageformat`/`audioformat`), not from the input file extension.
+
+### Architecture notes
+
+* **arm64 (Apple Silicon)**: fully supported and tested (native Homebrew Qt6).
+* **x86_64 (Intel)**: the source code is architecture-clean and compiles as
+  x86_64, but linking requires an x86_64 Qt6 build (i.e. Homebrew under
+  Rosetta 2 at `/usr/local`, or an Intel Mac). Cross-linking against the
+  arm64-only Homebrew Qt frameworks is not possible.
+* **i386 (32-bit)**: not supported. Modern macOS SDKs and Qt6 dropped 32-bit
+  macOS entirely.
+
 # How can i compile source code? on Ubuntu/Unix
 
 ## Requirments

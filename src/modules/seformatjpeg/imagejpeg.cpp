@@ -339,10 +339,13 @@ namespace SEFormatJPEG {
         m_logger->debug("image saved");
         delete img;
         m_logger->debug("image deleted");
+
+        int imgWidth = gimg->width();
+        int imgHeight = gimg->height();
         delete gimg;
         m_logger->debug("gimg deleted");
 
-        if (x>=gimg->width() || y>=gimg->height())
+        if (x>=imgWidth || y>=imgHeight)
         {
             m_logger->warning("Data too large (" + QString::number(x) + ":" + QString::number(y) + ")");
             return false;

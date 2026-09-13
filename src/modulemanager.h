@@ -69,8 +69,13 @@ namespace SilentEye {
 
         static void load();
 
+        //! Unload every plug-in (must be called before the application exits)
+        static void unload();
+
     private:
         static void loadPlugin(QObject*, QString="Unknown");
+        //! Plugin loaders kept alive until unload()
+        static QList<QPluginLoader*> m_loaders;
 
     };
 }
