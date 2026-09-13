@@ -166,7 +166,7 @@ namespace SilentEye {
         setCursor(Qt::WaitCursor);
         QFileDialog dialog(this, tr("Select default output dir"));
         dialog.setViewMode(QFileDialog::List);
-        dialog.setFileMode(QFileDialog::DirectoryOnly);
+        dialog.setFileMode(QFileDialog::Directory);
         dialog.setDirectory(QDir::homePath());
         if(dialog.exec())
         {

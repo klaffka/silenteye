@@ -1,79 +1,64 @@
 PROJECT( seformatwav )
-cmake_minimum_required(VERSION 2.8.5)
+cmake_minimum_required(VERSION 3.16)
 
-find_package(Qt4 REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Multimedia REQUIRED)
 
-SET( QT_USE_QTXML TRUE )
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ui)
 
 IF(NOT STATIC_LIBRARY_FLAGS)
   SET( LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/modules )
-ENDIF(NOT STATIC_LIBRARY_FLAGS)
+ENDIF()
 
 INCLUDE_DIRECTORIES(
- ${CMAKE_BINARY_DIR}
- ${QT_INCLUDE_DIR}
- ${sef_SOURCE_DIR}
-)
-INCLUDE(${QT_USE_FILE})
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${sef_SOURCE_DIR}
+  )
 
 SET(seformatwav_SRCS
-  audiowav.cpp
   seformatwav.cpp
+  audiowav.cpp
   optionwidget.cpp
-)
-
-SET(seformatwav_MOC_HDRS
-  seformatwav.h 
-  optionwidget.h
-)
+  )
 
 SET(seformatwav_UIS
   ui/optionwidget.ui
-)
+  )
 
-QT4_WRAP_UI(seformatwav_UIS_H ${seformatwav_UIS})
-QT4_WRAP_CPP( seformatwav_SRCS ${seformatwav_MOC_HDRS} )
-
-ADD_DEFINITIONS(${QT_DEFINITIONS})
 ADD_DEFINITIONS(-DQT_NO_DEBUG)
 IF(STATIC_LIBRARY_FLAGS)
   ADD_DEFINITIONS(-DQT_STATICPLUGIN)
-ELSE(STATIC_LIBRARY_FLAGS)
+ELSE()
   ADD_DEFINITIONS(-DQT_PLUGIN)
   ADD_DEFINITIONS(-DQT_SHARED)
-ENDIF(STATIC_LIBRARY_FLAGS)
+ENDIF()
 ADD_DEFINITIONS(-DQT_DLL)
-ADD_DEFINITIONS(${QCA2_DEFINITIONS})
-
-LINK_LIBRARIES(seformatwav sef)
 
 IF(STATIC_LIBRARY_FLAGS)
-  ADD_LIBRARY(seformatwav STATIC ${seformatwav_SRCS} ${seformatwav_MOC_HDRS} ${seformatwav_UIS_H})
-  TARGET_LINK_LIBRARIES (seformatwav ${QT_LIBRARIES} silenteye) 
-ELSE(STATIC_LIBRARY_FLAGS)
-  ADD_LIBRARY(seformatwav SHARED ${seformatwav_SRCS} ${seformatwav_MOC_HDRS} ${seformatwav_UIS_H})
-  TARGET_LINK_LIBRARIES (seformatwav ${QT_LIBRARIES} ) 
-ENDIF(STATIC_LIBRARY_FLAGS)
+  ADD_LIBRARY(seformatwav STATIC ${seformatwav_SRCS} ${seformatwav_UIS})
+ELSE()
+  ADD_LIBRARY(seformatwav SHARED ${seformatwav_SRCS} ${seformatwav_UIS})
+ENDIF()
+
+TARGET_LINK_LIBRARIES(seformatwav
+  sef
+  Qt6::Core
+  Qt6::Gui
+  Qt6::Widgets
+  Qt6::Multimedia
+)
+
+IF(APPLE AND NOT STATIC_LIBRARY_FLAGS)
+  add_custom_command(TARGET seformatwav POST_BUILD
+    COMMAND mkdir ARGS -pv ${CMAKE_BINARY_DIR}/silenteye.app/Contents/MacOS/modules
+    COMMAND cp ARGS $<TARGET_FILE:seformatwav> ${CMAKE_BINARY_DIR}/silenteye.app/Contents/MacOS/modules/
+    COMMENT "copy seformatwav plug-in into silenteye.app"
+  )
+ENDIF()
 
 if($ENV{ENABLE_TESTSUITE})
   message("** Enabled seformatwav testsuite ")
-  subdirs( ./testsuite )
-endif($ENV{ENABLE_TESTSUITE})
-
-IF($ENV{ENABLE_PACK})
-  IF(NOT STATIC_LIBRARY_FLAGS)
-    IF(WIN32)
-      install(TARGETS seformatwav RUNTIME DESTINATION modules COMPONENT seformatwav)
-    ELSE(WIN32)
-      IF(APPLE)
-        GET_TARGET_PROPERTY(LIB_LOCATION seformatwav LOCATION)
-        add_custom_command(TARGET seformatwav POST_BUILD
-          COMMAND cp ARGS ${LIB_LOCATION} ${CMAKE_BINARY_DIR}/silenteye.app/Contents/MacOS/modules/
-          COMMENT "copy seformatwav plug-in into silenteye.app"
-        )
-      ELSE(APPLE)
-        install(TARGETS seformatwav DESTINATION ${INSTALL_LIBPATH}/modules COMPONENT seformatwav)
-      ENDIF(APPLE)
-    ENDIF(WIN32)
-  ENDIF(NOT STATIC_LIBRARY_FLAGS)
-ENDIF($ENV{ENABLE_PACK})
+  add_subdirectory( ./testsuite )
+endif()

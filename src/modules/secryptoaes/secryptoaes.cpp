@@ -18,7 +18,7 @@
 
 namespace SECryptoAES {
 
-    SECryptoAES::SECryptoAES()
+    SECryptoAESModule::SECryptoAESModule()
     {
         this->setObjectName("SECryptoAES128");
         m_logger = new Logger(this);
@@ -26,14 +26,14 @@ namespace SECryptoAES {
         m_isQcaCompatible = false;
     }
 
-    SECryptoAES::~SECryptoAES()
+    SECryptoAESModule::~SECryptoAESModule()
     {
         if (m_init != NULL)
             delete m_init;
         delete m_logger;
     }
 
-    void SECryptoAES::init()
+    void SECryptoAESModule::init()
     {
         if (m_init != NULL)
             return;
@@ -59,17 +59,17 @@ namespace SECryptoAES {
     }
 
 
-    QString SECryptoAES::name() const
+    QString SECryptoAESModule::name() const
     {
         return QString("Silent Eye Encryption "+typeSupported());
     }
 
-    QString SECryptoAES::version() const
+    QString SECryptoAESModule::version() const
     {
         return QString("1.1");
     }
 
-    QString SECryptoAES::status()
+    QString SECryptoAESModule::status()
     {
         init();
         if(m_isQcaCompatible)
@@ -78,12 +78,12 @@ namespace SECryptoAES {
             return "KO|'aes128-cbc-pkcs7' not supported by system.\nPlease check your 'libqca2-plugin-ossl' installation.";
     }
 
-    QString SECryptoAES::typeSupported() const
+    QString SECryptoAESModule::typeSupported() const
     {
         return QString("AES128");
     }
 
-    QCA::SecureArray SECryptoAES::initializationVector(QString key)
+    QCA::SecureArray SECryptoAESModule::initializationVector(QString key)
     {
         QByteArray hash = QCryptographicHash::hash(key.toUtf8(), QCryptographicHash::Md5);
         QString md5 = hash.toHex();
@@ -96,7 +96,7 @@ namespace SECryptoAES {
         return QCA::InitializationVector( QCA::SecureArray(value.toUtf8()) );
     }
 
-    QPointer<EncodedData> SECryptoAES::encode(QString key, QPointer<EncodedData> msg)
+    QPointer<EncodedData> SECryptoAESModule::encode(QString key, QPointer<EncodedData> msg)
     {
         init();
         if(!m_isQcaCompatible){
@@ -137,7 +137,7 @@ namespace SECryptoAES {
         return new EncodedData(u.append(f).toByteArray(), Data::BYTES, false);
     }
 
-    QPointer<EncodedData> SECryptoAES::decode(QString key, QPointer<EncodedData> data)
+    QPointer<EncodedData> SECryptoAESModule::decode(QString key, QPointer<EncodedData> data)
     {
         init();
         if(!m_isQcaCompatible){
@@ -178,5 +178,3 @@ namespace SECryptoAES {
     }
 
 }
-
-Q_EXPORT_PLUGIN2(secryptoaes, SECryptoAES::SECryptoAES)

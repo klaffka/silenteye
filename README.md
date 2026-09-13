@@ -44,6 +44,27 @@ Encryption:
 ./silenteye --batch encode ./myfile.png --message "my secret message" --password "my password"
 ```
 
+# How can i compile source code? on macOS Apple Silicon
+
+Install the native arm64 dependencies with Homebrew:
+
+```Shell
+brew install cmake qtbase qtdeclarative qtsvg qtmultimedia qca
+```
+
+Build the Qt6 port in a separate directory:
+
+```Shell
+ENABLE_MODULE=1 cmake -S . -B build-arm64
+cmake --build build-arm64 --parallel
+```
+
+The application bundle is created at `build-arm64/silenteye.app`. To run batch mode:
+
+```Shell
+build-arm64/silenteye.app/Contents/MacOS/silenteye --help
+```
+
 # How can i compile source code? on Ubuntu/Unix
 
 ## Requirments

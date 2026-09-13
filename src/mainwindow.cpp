@@ -14,6 +14,8 @@
 //  along with SilentEye. If not, see <http://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
+#include <QMediaDevices>
+#include <QAudioDevice>
 #include "controller.h"
 
 #include <audio.h>
@@ -27,8 +29,10 @@ namespace SilentEye {
         m_logger = new Logger(this);
 
         /* center the window */
-        QRect rect = QApplication::desktop()->availableGeometry(this);
-        move(rect.center() - this->rect().center());
+        QScreen* screen = QGuiApplication::primaryScreen();
+        QRect rect = screen ? screen->availableGeometry() : QRect();
+        if (rect.isValid())
+            move(rect.center() - this->rect().center());
 
         m_hasMediaLoaded = false;
         tabWidget->clear();
@@ -230,7 +234,7 @@ namespace SilentEye {
     {
         setCursor(Qt::WaitCursor);
         QFileDialog dialog(this, tr("Open Media"));
-        dialog.setFilter(tr("Media Files (*.png *.jpg .jpeg *.bmp *.tiff *.tif *.wav)"));
+        dialog.setNameFilter(tr("Media Files (*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.wav)"));
         dialog.setViewMode(QFileDialog::List);
         dialog.setFileMode(QFileDialog::ExistingFiles);
         dialog.setDirectory(Controller::instance()->config.get("output"));
@@ -284,14 +288,15 @@ namespace SilentEye {
             if (media->type() == Media::AUDIO) {
                 if (!m_currentSound.isNull())
                     delete m_currentSound;
-                if (!QSound::isAvailable())
+                if (QMediaDevices::defaultAudioOutput().isNull())
                 {
                     QMessageBox::warning(this, tr("SilentEye Warning"),
                                          "Audio device is not ready!");
                 }
                 else
                 {
-                    m_currentSound = new QSound(media->filePath());
+                    m_currentSound = new QSoundEffect(this);
+                    m_currentSound->setSource(QUrl::fromLocalFile(media->filePath()));
                     m_currentSound->play();
                 }
             }

@@ -115,7 +115,7 @@ namespace SilentEyeFramework {
         else if(format == Data::LATIN1)
             _data = new Data(format, str.toLatin1());
         else
-            _data = new Data(format, str.toAscii());
+            _data = new Data(format, str.toLatin1());
         
 
         if (compress)
@@ -386,7 +386,7 @@ namespace SilentEyeFramework {
         else if(dataFormat == Data::LATIN1)
             return QString::fromLatin1(bytes.data());
         else if(dataFormat == Data::ASCII)
-            return QString::fromAscii(bytes.data());
+            return QString::fromLatin1(bytes.data());
         else if(dataFormat == Data::FILE)
             return _data->name();
 

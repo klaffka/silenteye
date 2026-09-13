@@ -16,7 +16,8 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include <QtGui>
+#include <QtWidgets>
+#include <QSoundEffect>
 #include "ui_mainwindow.h"
 
 #include "aboutdialog.h"
@@ -51,7 +52,7 @@ namespace SilentEye {
         QMap<QString, QPointer<Media> > m_mediaMap;
         bool m_hasMediaLoaded;
 
-        QPointer<QSound> m_currentSound;
+        QPointer<QSoundEffect> m_currentSound;
 
         QPointer<Logger> m_logger;
     public:

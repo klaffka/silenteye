@@ -148,5 +148,3 @@ namespace SEFormatJPEG {
     }
 
 }
-
-Q_EXPORT_PLUGIN2(seformatjpeg, SEFormatJPEG::SEFormatJpeg)

@@ -17,8 +17,7 @@
 #define CONFIG_H_
 
 #include <QtCore>
-#include <QDomDocument>
-#include <QDomElement>
+#include <QXmlStreamReader>
 
 #include "logger.h"
 

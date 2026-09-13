@@ -30,9 +30,11 @@ using namespace SilentEyeFramework;
 //! SilentEye offical cryprographic module for support of encryption in AES 256.
 namespace SECryptoAES256 {
 
-    class SECryptoAES256 : public CryptoModuleInterface
+    class SECryptoAES256Module : public CryptoModuleInterface
     {
         Q_OBJECT;
+        Q_PLUGIN_METADATA(IID "org.silenteye.secryptoaes256")
+
         Q_INTERFACES(SilentEyeFramework::CryptoModuleInterface);
 
     private:
@@ -42,8 +44,8 @@ namespace SECryptoAES256 {
         QCA::Initializer* m_init;
 
     public:
-        SECryptoAES256();
-        ~SECryptoAES256();
+        SECryptoAES256Module();
+        ~SECryptoAES256Module();
 
         QString name() const;
         QString version() const;

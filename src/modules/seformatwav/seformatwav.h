@@ -33,6 +33,8 @@ namespace SEFormatWAV {
     class SEFormatWav : public AudioModuleInterface
     {
         Q_OBJECT;
+        Q_PLUGIN_METADATA(IID "org.silenteye.seformatwav")
+
         Q_INTERFACES(SilentEyeFramework::AudioModuleInterface);
 
     private:

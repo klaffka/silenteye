@@ -33,6 +33,8 @@ namespace SEFormatBMP {
     class SEFormatBmp : public ImageModuleInterface
     {
         Q_OBJECT;
+        Q_PLUGIN_METADATA(IID "org.silenteye.seformatbmp")
+
         Q_INTERFACES(SilentEyeFramework::ImageModuleInterface);
 
     private:

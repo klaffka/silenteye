@@ -224,7 +224,7 @@ namespace SEFormatWAV {
         writeWaveHeader(out);
 
         // prepare output for writing
-        if (m_byteOrder == QAudioFormat::BigEndian) {
+        if (m_byteOrder == AudioFormat::BigEndian) {
             out.setByteOrder(QDataStream::BigEndian);
         } else {
             out.setByteOrder(QDataStream::LittleEndian);

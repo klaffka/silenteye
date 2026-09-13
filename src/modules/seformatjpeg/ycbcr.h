@@ -34,9 +34,9 @@ namespace SEFormatJPEG {
         float m_cr;
 
         //! Mathematic value for conversion
-        static const float kb = 0.114;
+        static constexpr float kb = 0.114;
         //! Mathematic value for conversion
-        static const float kr = 0.299;
+        static constexpr float kr = 0.299;
 
     public:
         //! Create an YCbCr pixel from YCbCr
@@ -47,17 +47,17 @@ namespace SEFormatJPEG {
 
         float y() const;
         void setY(float);
-        
+
         float cb() const;
         void setCb(float);
-        
+
         float cr() const;
         void setCr(float);
 
         //! Convert the YCbCr value into RGB Color
-        QRgb toRGB();
-        
-        QString toString();
+         QRgb toRGB();
+
+         QString toString();
 
         bool operator==(const YCbCr&);
     };

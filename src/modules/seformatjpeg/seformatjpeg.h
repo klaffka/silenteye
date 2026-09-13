@@ -34,6 +34,8 @@ namespace SEFormatJPEG {
     class SEFormatJpeg : public ImageModuleInterface
     {
         Q_OBJECT;
+        Q_PLUGIN_METADATA(IID "org.silenteye.seformatjpeg")
+
         Q_INTERFACES(SilentEyeFramework::ImageModuleInterface);
 
     private:

@@ -15,6 +15,9 @@
 
 #include "config.h"
 
+#include <QXmlStreamWriter>
+#include <QBuffer>
+
 namespace SilentEyeFramework {
 
     Config::Config(QObject* parent)
@@ -134,18 +137,6 @@ namespace SilentEyeFramework {
 
     void Config::save()
     {
-        QDomDocument doc( "SilentEye" );
-        QDomElement root = doc.createElement("configuration");
-        doc.appendChild(root);
-
-        QMap<QString, QString>::const_iterator i = m_valueMap.constBegin();
-        while (i != m_valueMap.constEnd()) {
-            QDomElement conf = doc.createElement(i.key());
-            conf.appendChild(doc.createTextNode(i.value()));
-            root.appendChild(conf);
-            ++i;
-        }
-
         /* open the output file */
         QFile file(m_filepath+m_filename);
         if( !file.open( QIODevice::WriteOnly ) )
@@ -156,58 +147,62 @@ namespace SilentEyeFramework {
         }
 
         /* write data to the output file */
-        QTextStream ts( &file );
-        /* Profile serialize datas */
-        ts << doc.toString();
+        QXmlStreamWriter xml( &file );
+        xml.setAutoFormatting(true);
+        xml.writeStartDocument();
+        xml.writeStartElement("configuration");
+
+        QMap<QString, QString>::const_iterator i = m_valueMap.constBegin();
+        while (i != m_valueMap.constEnd()) {
+            xml.writeTextElement(i.key(), i.value());
+            ++i;
+        }
+
+        xml.writeEndElement();
+        xml.writeEndDocument();
         file.close();
     }
 
     bool Config::load()
     {
-        QDomDocument doc( "SilentEye" );
+        QBuffer buffer;
+        QFile file;
 
+        QXmlStreamReader xml;
         if (!m_content.isEmpty()) {
-            if(!doc.setContent( m_content ) )
-            {
-                m_logger->warning("Can't load buffer content to xml document: "
-                                  + m_content);
-                return false;
-            }
-        } else {
-            QFile file(m_filepath+m_filename);
-            if(file.open( QIODevice::ReadOnly ) )
-            {
-                /* load file content to xml document */
-                if(!doc.setContent( &file ) )
-                {
-                    m_logger->warning("Can't load file content to xml document (XML syntax error?): "
-                                      + fileAbsoluteName());
-                    file.close();
-                    return false;
-                }
-                file.close();
-            }
-            else
+            buffer.setData(m_content.toUtf8());
+            buffer.open(QIODevice::ReadOnly);
+            xml.setDevice(&buffer);
+        }
+        else
+        {
+            file.setFileName(m_filepath+m_filename);
+            if(!file.open( QIODevice::ReadOnly ) )
             {
                 m_logger->warning("Can't open configuration file: "
                                   + fileAbsoluteName());
                 return false;
             }
+            xml.setDevice(&file);
         }
 
-        QDomElement root = doc.documentElement();
-
-        QDomNode n = root.firstChild();
-
-        while(!n.isNull())
+        while(!xml.atEnd())
         {
-            QDomElement e = n.toElement();
-            if( !e.isNull() )
+            xml.readNext();
+            if(xml.isStartElement()
+               && xml.name() != QLatin1String("configuration"))
             {
-                m_valueMap[e.tagName()] = e.text();
+                m_valueMap[xml.name().toString()] = xml.readElementText();
             }
-            n = n.nextSibling();
         }
+
+        if (xml.hasError())
+        {
+            m_logger->warning("Can't load file content to xml document (XML syntax error?): "
+                              + fileAbsoluteName());
+            return false;
+        }
+
         return true;
     }
 

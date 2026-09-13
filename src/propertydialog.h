@@ -16,7 +16,7 @@
 #ifndef PROPERTYDIALOG_H_
 #define PROPERTYDIALOG_H_
 
-#include <QtGui>
+#include <QtWidgets>
 #include <image.h>
 #include <logger.h>
 #include "ui_propertydialog.h"

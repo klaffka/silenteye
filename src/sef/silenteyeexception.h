@@ -17,28 +17,29 @@
 #define _SILENTEYE_EXCEPTION_H_
 
 #include <QtCore>
+#include <QException>
 
 namespace SilentEyeFramework {
 
     //! Internal exception only used by SilentEyeFramework
-    class SilentEyeException : public QtConcurrent::Exception
+    class SilentEyeException : public QException
     {
     protected:
         QString m_message;
         QString m_details;
 
     public:
-        SilentEyeException(const QString& message) throw();
-        SilentEyeException(const QString& message, const QString& details) throw();
+        SilentEyeException(const QString& message);
+        SilentEyeException(const QString& message, const QString& details);
 
-        SilentEyeException(const SilentEyeException& exception) throw();
-        ~SilentEyeException() throw();
+        SilentEyeException(const SilentEyeException& exception);
+        ~SilentEyeException() noexcept override;
 
         QString message() const;
         QString details() const;
 
-        void raise() const{ throw *this; }
-        Exception *clone() const{ return new SilentEyeException(*this); }
+        void raise() const override{ throw *this; }
+        QException *clone() const override{ return new SilentEyeException(*this); }
     };
 
 }

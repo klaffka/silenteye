@@ -149,5 +149,3 @@ namespace SEFormatWAV {
     }
 
     }
-
-Q_EXPORT_PLUGIN2(seformatwav, SEFormatWAV::SEFormatWav)

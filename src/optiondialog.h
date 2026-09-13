@@ -16,7 +16,7 @@
 #ifndef OPTIONDIALOG_H_
 #define OPTIONDIALOG_H_
 
-#include <QtGui>
+#include <QtWidgets>
 #include <image.h>
 #include <config.h>
 #include <logger.h>

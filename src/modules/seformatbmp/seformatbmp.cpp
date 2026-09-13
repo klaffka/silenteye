@@ -148,5 +148,3 @@ namespace SEFormatBMP {
     }
 
     }
-
-Q_EXPORT_PLUGIN2(seformatbmp, SEFormatBMP::SEFormatBmp)

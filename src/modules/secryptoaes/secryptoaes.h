@@ -30,9 +30,11 @@ using namespace SilentEyeFramework;
 //! SilentEye offical cryprographic module for support of encryption in AES 128.
 namespace SECryptoAES {
 
-    class SECryptoAES : public CryptoModuleInterface
+    class SECryptoAESModule : public CryptoModuleInterface
     {
         Q_OBJECT;
+        Q_PLUGIN_METADATA(IID "org.silenteye.secryptoaes")
+
         Q_INTERFACES(SilentEyeFramework::CryptoModuleInterface);
 
     private:
@@ -42,8 +44,8 @@ namespace SECryptoAES {
         QCA::Initializer* m_init;
 
     public:
-        SECryptoAES();
-        ~SECryptoAES();
+        SECryptoAESModule();
+        ~SECryptoAESModule();
 
         QString name() const;
         QString version() const;

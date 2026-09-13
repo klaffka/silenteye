@@ -16,7 +16,7 @@
 #ifndef OPTIONWIDGET_H_
 #define OPTIONWIDGET_H_
 
-#include <QtGui>
+#include <QtWidgets>
 #include "ui_optionwidget.h"
 
 #include <logger.h>

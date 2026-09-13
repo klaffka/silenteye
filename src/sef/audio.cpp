@@ -78,11 +78,11 @@ namespace SilentEyeFramework {
 
         if (identifier == "RIFF")
         {
-            m_byteOrder = QAudioFormat::BigEndian;
+            m_byteOrder = AudioFormat::BigEndian;
         }
         else if (identifier == "RIFX ")
         {
-            m_byteOrder = QAudioFormat::LittleEndian;
+            m_byteOrder = AudioFormat::LittleEndian;
         }
         else
         {
@@ -134,9 +134,9 @@ namespace SilentEyeFramework {
         stream >> m_bitPerSample;
         m_format.setSampleSize(m_bitPerSample);
         if (m_bitPerSample == 8) {
-            m_format.setSampleType(QAudioFormat::UnSignedInt);
+            m_format.setSampleType(AudioFormat::UnSignedInt);
         } else if (m_bitPerSample == 16) {
-            m_format.setSampleType(QAudioFormat::SignedInt);
+            m_format.setSampleType(AudioFormat::SignedInt);
         } else {
             throw ModuleException("Selected file is not in a valid/supported WAVE format.",
                                   "BitsPerSample must be 8 or 16!");
@@ -164,7 +164,7 @@ namespace SilentEyeFramework {
         m_bitRate = floor((m_subDataSize * 8.0) / m_duration);
     }
 
-    QAudioFormat Audio::format() const
+    AudioFormat Audio::format() const
     {
         return m_format;
     }
@@ -195,7 +195,7 @@ namespace SilentEyeFramework {
         m_sampleStream.setDevice(&m_file);
         m_sampleStream.skipRawData(headerLength());
 
-        if (m_byteOrder == QAudioFormat::BigEndian) {
+        if (m_byteOrder == AudioFormat::BigEndian) {
             m_sampleStream.setByteOrder(QDataStream::BigEndian);
         } else {
             m_sampleStream.setByteOrder(QDataStream::LittleEndian);
@@ -250,7 +250,7 @@ namespace SilentEyeFramework {
         stream.setByteOrder(QDataStream::BigEndian);
 
         // CHUNK DESCRIPTION
-        if (m_byteOrder == QAudioFormat::LittleEndian) {
+        if (m_byteOrder == AudioFormat::LittleEndian) {
             stream.writeRawData("RIFX", 4);
         } else {
             stream.writeRawData("RIFF", 4);

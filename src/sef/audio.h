@@ -19,16 +19,64 @@
 #include "media.h"
 
 #include <QString>
-#include <QtMultimedia/QAudioFormat>
+#include <QMetaType>
 
 namespace SilentEyeFramework {
+
+    //! Simple audio format description (Qt6 replacement for QAudioFormat)
+    /*! Describes byte order, codec, channels, sample rate and sample size
+        of a wave stream without any QtMultimedia dependency. */
+    class AudioFormat
+    {
+    public:
+        enum SampleType {
+            Unknown,
+            SignedInt,
+            UnSignedInt,
+            Float,
+            CustomSample
+        };
+        enum Endian {
+            BigEndian,
+            LittleEndian
+        };
+
+        AudioFormat()
+            : m_sampleType(Unknown),
+              m_byteOrder(LittleEndian),
+              m_channels(0),
+              m_frequency(0),
+              m_sampleSize(0)
+        {}
+
+        void setCodec(const QString& codec) { m_codec = codec; }
+        QString codec() const { return m_codec; }
+        void setSampleType(SampleType type) { m_sampleType = type; }
+        SampleType sampleType() const { return m_sampleType; }
+        void setByteOrder(Endian order) { m_byteOrder = order; }
+        Endian byteOrder() const { return m_byteOrder; }
+        void setChannels(int channels) { m_channels = channels; }
+        int channels() const { return m_channels; }
+        void setFrequency(int frequency) { m_frequency = frequency; }
+        int frequency() const { return m_frequency; }
+        void setSampleSize(int size) { m_sampleSize = size; }
+        int sampleSize() const { return m_sampleSize; }
+
+    private:
+        QString m_codec;
+        SampleType m_sampleType;
+        Endian m_byteOrder;
+        int m_channels;
+        int m_frequency;
+        int m_sampleSize;
+    };
 
     //! Generic representation of audio which can load and hide specific data according to it's format
     class Audio : public Media
     {
     protected:
         //! sound format (byterate, channels, ...)
-        QAudioFormat m_format;
+        AudioFormat m_format;
 
         // Chunk description
         //! ChunkSize
@@ -52,7 +100,7 @@ namespace SilentEyeFramework {
         //! Subchunk2Size: == NumSamples * NumChannels * BitsPerSample/8 This is the number of bytes in the data. You can also think of this as the size of the read of the subchunk following this number.
         quint32 m_subDataSize;
         //! byte ordering assumed for WAVE data (little-endian for RIFF, big-endian for RIFX)
-        QAudioFormat::Endian m_byteOrder;
+        AudioFormat::Endian m_byteOrder;
 
         //! length of the recording (in seconds)
         double m_duration;
@@ -71,7 +119,7 @@ namespace SilentEyeFramework {
 
         virtual double duration();
         virtual quint32 bitRate();
-        virtual QAudioFormat format() const;
+        virtual AudioFormat format() const;
 
         //! WAV file header length in octets
         static int headerLength() { return 44; }

@@ -186,12 +186,12 @@ namespace SEFormatJPEG
                 else if (currentMD5position + 1 < _md5.size())
                 {
                     // get the next number if the current is over.
-                    currentMD5value = -48 + (int)_md5[++currentMD5position].toAscii();
+                    currentMD5value = -48 + (int)_md5[++currentMD5position].toLatin1();
                 }
                 else
                 {
                     // get the next number if the current is over.
-                    currentMD5value = -48 + (int)_md5[0].toAscii();
+                    currentMD5value = -48 + (int)_md5[0].toLatin1();
                     currentMD5position = 0;
                 }
                 //throw Exception("MD5 string is too short for an interval of " + _k + " (k)");
@@ -237,10 +237,11 @@ namespace SEFormatJPEG
         QString str = "> Stego tables\n";
         for (int i=0; i < _stTables.size(); i++)
         {
-            str += i+": ";
+            str += QString::number(i)+": ";
             for (int j = 0; j < _stTables[i].size(); j++)
             {
-                str += _stTables[i][j] + QString(",");
+                bool isBitSet = _stTables[i][j];
+                str += QString(isBitSet ? "1" : "0") + QString(",");
             }
             str += "\n";
         }

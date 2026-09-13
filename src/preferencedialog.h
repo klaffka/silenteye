@@ -16,7 +16,7 @@
 #ifndef PREFERENCEDIALOG_H_
 #define PREFERENCEDIALOG_H_
 
-#include <QtGui>
+#include <QtWidgets>
 #include "ui_preferencedialog.h"
 
 namespace SilentEye {

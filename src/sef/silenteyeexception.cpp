@@ -17,26 +17,26 @@
 
 namespace SilentEyeFramework {
 
-    SilentEyeException::SilentEyeException(const QString& message) throw()
-        : Exception() {
+    SilentEyeException::SilentEyeException(const QString& message)
+        : QException() {
         m_message = message;
         m_details = "";
     }
 
     SilentEyeException::SilentEyeException(const QString& message,
-                                           const QString& details) throw()
-                                               : Exception(){
+                                           const QString& details)
+                                               : QException(){
         m_message = message;
         m_details = details;
     }
 
-    SilentEyeException::SilentEyeException(const SilentEyeException& exception) throw()
-        : Exception(){
+    SilentEyeException::SilentEyeException(const SilentEyeException& exception)
+        : QException(){
         m_message = exception.message();
         m_details = exception.details();
     }
 
-    SilentEyeException::~SilentEyeException() throw(){}
+    SilentEyeException::~SilentEyeException() {}
 
     QString SilentEyeException::message() const{
         return m_message;

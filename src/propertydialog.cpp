@@ -72,9 +72,9 @@ namespace SilentEye {
         {
             Audio* audio = (Audio*) m_md;
             QString format = audio->format().codec().toUpper();
-            if (audio->format().sampleType() == QAudioFormat::UnSignedInt) {
+            if (audio->format().sampleType() == AudioFormat::UnSignedInt) {
                 format += " unsigned ";
-            } else if (audio->format().sampleType() == QAudioFormat::SignedInt) {
+            } else if (audio->format().sampleType() == AudioFormat::SignedInt) {
                 format += " signed ";
             }
             format += QString::number(audio->format().sampleSize()) + " bit";

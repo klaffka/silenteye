@@ -16,7 +16,7 @@
 #ifndef OPTIONWIDGETBMP_H_
 #define OPTIONWIDGETBMP_H_
 
-#include <QtGui>
+#include <QtWidgets>
 #include "ui_optionwidget.h"
 
 #include <logger.h>

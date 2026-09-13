@@ -75,7 +75,7 @@ namespace SilentEye {
         setCursor(Qt::WaitCursor);
         QFileDialog dialog(this, tr("Save to"));
         dialog.setViewMode(QFileDialog::List);
-        dialog.setFileMode(QFileDialog::DirectoryOnly);
+        dialog.setFileMode(QFileDialog::Directory);
         dialog.setDirectory(Controller::instance()->config.get("output"));
         if(dialog.exec())
         {
@@ -101,7 +101,7 @@ namespace SilentEye {
         QFileDialog dialog(this, (save)?tr("Select destination"):tr("Select file to hide"));
         dialog.setViewMode(QFileDialog::List);
         if (save)
-            dialog.setFileMode(QFileDialog::DirectoryOnly);
+            dialog.setFileMode(QFileDialog::Directory);
         else
             dialog.setFileMode(QFileDialog::ExistingFiles);
         dialog.setDirectory(Controller::instance()->config.get("output"));
