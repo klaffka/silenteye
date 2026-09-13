@@ -38,12 +38,30 @@ jobs:
           APP="build/silenteye.app"
           cp build/libsef.dylib "$APP/Contents/MacOS/"
 
-          # bundle the Qt frameworks used by the executable and the plug-ins
+          # bundle the QCA crypto providers (needed for the AES modules) so the
+          # app is self-contained; they are rewritten by macdeployqt below
+          mkdir -p "$APP/Contents/MacOS/crypto"
+          cp "$(brew --prefix qca)"/lib/qt/plugins/crypto/*.dylib "$APP/Contents/MacOS/crypto/"
+
+          # bundle the Qt frameworks used by the executable, the plug-ins and
+          # the crypto providers
           EXTRA=""
-          for lib in "$APP"/Contents/MacOS/modules/*.dylib; do
+          for lib in "$APP"/Contents/MacOS/modules/*.dylib "$APP"/Contents/MacOS/crypto/*.dylib; do
             EXTRA="$EXTRA -executable=$lib"
           done
-          macdeployqt "$APP" -always-overwrite $EXTRA
+          macdeployqt "$APP" -always-overwrite $EXTRA || true
+
+          # macdeployqt rewrites install names (invalidating signatures) and
+          # reports an error doing so; re-sign the whole bundle ad-hoc
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep "$APP"
+
+          # make sure no Homebrew absolute paths leaked into the bundle
+          if otool -L "$APP/Contents/MacOS/silenteye" "$APP/Contents/MacOS/modules/"*.dylib \
+               "$APP/Contents/MacOS/crypto/"*.dylib | grep -q "/opt/homebrew"; then
+            echo "ERROR: bundle still references Homebrew paths" >&2
+            exit 1
+          fi
 
           ditto -c -k --keepParent "$APP" silenteye-macos-arm64.zip
           ls -lh silenteye-macos-arm64.zip
