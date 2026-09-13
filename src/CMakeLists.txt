@@ -59,17 +59,30 @@ IF(WIN32)
 ENDIF(WIN32)
 IF(APPLE)
   ADD_EXECUTABLE(silenteye MACOSX_BUNDLE ${silenteye_SRCS} ${silenteye_UIS} ${silenteye_RCS})
-  add_custom_command(TARGET silenteye PRE_BUILD
-       COMMAND mkdir ARGS -pv ${CMAKE_BINARY_DIR}/silenteye.app/Contents/MacOS/modules
-       COMMENT "Create ./silenteye.app/Contents/MacOS/modules directory")
-  add_custom_command(TARGET silenteye POST_BUILD
-       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/silenteye.conf ${CMAKE_SOURCE_DIR}/version.xml ${CMAKE_BINARY_DIR}/silenteye.app/Contents/MacOS/
-       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/seformatbmp.conf ${CMAKE_SOURCE_DIR}/seformatjpeg.conf ${CMAKE_SOURCE_DIR}/seformatwav.conf ${CMAKE_BINARY_DIR}/silenteye.app/Contents/MacOS/
-       COMMENT "Copy configuration files into silenteye.app bundle")
 ENDIF(APPLE)
 IF(UNIX AND NOT APPLE)
   ADD_EXECUTABLE(silenteye ${silenteye_SRCS} ${silenteye_UIS} ${silenteye_RCS})
 ENDIF(UNIX AND NOT APPLE)
+
+# Runtime directory: inside the bundle on macOS, next to the executable elsewhere
+IF(APPLE)
+  SET(SILENTEYE_RUNTIME_DIR ${CMAKE_BINARY_DIR}/silenteye.app/Contents/MacOS)
+  add_custom_command(TARGET silenteye PRE_BUILD
+       COMMAND mkdir ARGS -pv ${SILENTEYE_RUNTIME_DIR}/modules
+       COMMENT "Create ./silenteye.app/Contents/MacOS/modules directory")
+ELSE()
+  SET(SILENTEYE_RUNTIME_DIR ${CMAKE_BINARY_DIR})
+ENDIF()
+
+add_custom_command(TARGET silenteye POST_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+             ${CMAKE_SOURCE_DIR}/silenteye.conf
+             ${CMAKE_SOURCE_DIR}/version.xml
+             ${CMAKE_SOURCE_DIR}/seformatbmp.conf
+             ${CMAKE_SOURCE_DIR}/seformatjpeg.conf
+             ${CMAKE_SOURCE_DIR}/seformatwav.conf
+             ${SILENTEYE_RUNTIME_DIR}/
+     COMMENT "Copy configuration files next to the executable")
 
 TARGET_LINK_LIBRARIES(silenteye
     sef

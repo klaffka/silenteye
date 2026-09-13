@@ -4,6 +4,16 @@ cmake_minimum_required(VERSION 3.16)
 find_package(Qt6 COMPONENTS Core REQUIRED)
 find_package(Qca-qt6 2.3 REQUIRED)
 
+# QCA's CMake package exposes either a plain "qca-qt6" target (Homebrew/MSYS2)
+# or a namespaced target depending on the build; resolve it defensively.
+IF(TARGET qca-qt6)
+  SET(SILENTEYE_QCA_TARGET qca-qt6)
+ELSEIF(TARGET Qca-qt6::qca-qt6)
+  SET(SILENTEYE_QCA_TARGET Qca-qt6::qca-qt6)
+ELSE()
+  MESSAGE(FATAL_ERROR "No usable QCA (Qt6) CMake target found")
+ENDIF()
+
 set(CMAKE_AUTOMOC ON)
 
 IF(NOT STATIC_LIBRARY_FLAGS)
@@ -35,7 +45,7 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(secryptoaes
   sef
-  qca-qt6
+  ${SILENTEYE_QCA_TARGET}
   Qt6::Core
 )
 

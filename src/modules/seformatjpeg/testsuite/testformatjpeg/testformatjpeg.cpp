@@ -29,7 +29,7 @@ void TestFormatJPEG::process_data()
     QTest::addColumn<QString>("imagePath");
     QTest::addColumn<QString>("text");
 
-    QTest::newRow("Normal process1") << "./source1.png" << "My pretty text to encode";
+    QTest::newRow("Normal process1") << "./source.png" << "My pretty text to encode";
     QTest::newRow("Normal process2") << "./source2.png" << "My pretty text to encode";
     QTest::newRow("Normal process3") << "./source3.png" << "My pretty text to encode into JPEG";
     QTest::newRow("Normal process4") << "./source4.png" << "My pretty text!";
@@ -71,7 +71,7 @@ void TestFormatJPEG::process()
         qWarning() << e->message() <<  " : " << e->details();
         QFAIL("ModuleException");
     }
-    catch(QtConcurrent::Exception e)
+    catch(QException e)
     {
         qWarning() << e.what();
         QFAIL("Unknown Exception");
@@ -84,11 +84,11 @@ void TestFormatJPEG::manualProcess_data()
     QTest::addColumn<QString>("text");
     QTest::addColumn<int>("header");
 
-    QTest::newRow("Manual process (top1)") << "./source1.png" << "My pretty text to encode"
+    QTest::newRow("Manual process (top1)") << "./source.png" << "My pretty text to encode"
             << (int)ImageJPEG::TOP;
-    QTest::newRow("Manual process (bottom1)") << "./source1.png" << "My pretty text to encode"
+    QTest::newRow("Manual process (bottom1)") << "./source.png" << "My pretty text to encode"
             << (int)ImageJPEG::BOTTOM;
-    QTest::newRow("Manual process (bottom1, size max)") << "./source1.png"
+    QTest::newRow("Manual process (bottom1, size max)") << "./source.png"
             << QString("My pretty text to encod->27")
             << (int)ImageJPEG::BOTTOM;
 
@@ -116,7 +116,7 @@ void TestFormatJPEG::manualProcess_data()
             + "My pretty text to encode My pretty text to encode "
             + "My pretty text to encode My pretty text ->146"
             << (int)ImageJPEG::BOTTOM;
-            
+
     QTest::newRow("Manual process (top4)") << "./source4.png" << "Myprettytex"
             << (int)ImageJPEG::TOP;
     QTest::newRow("Manual process (bottom4)") << "./source4.png" << "Myprettytexe"
@@ -134,7 +134,7 @@ void TestFormatJPEG::manualProcess()
 
     if(m_module==NULL)
         QFAIL("Can't load a SEFormatJPEG module...");
-    
+
     QString dest("./");
     for (int k = 20; k >= 5; k-=3)
     {
@@ -189,4 +189,4 @@ void TestFormatJPEG::loadModule()
     }
 }
 
-QTEST_MAIN(TestFormatJPEG); 
+QTEST_MAIN(TestFormatJPEG);

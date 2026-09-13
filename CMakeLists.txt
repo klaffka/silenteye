@@ -147,8 +147,14 @@ find_package(Qt6 COMPONENTS Core Gui Widgets Network Concurrent Multimedia Core5
 find_package(Qca-qt6 2.3 REQUIRED)
 
 # Set the compilation parameters
-IF(APPLE AND EXISTS "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/type_traits")
-  # Workaround for incomplete CommandLineTools libc++ headers in /usr/include/c++/v1
+# Workaround for an incomplete CommandLineTools libc++ install: when the
+# non-SDK c++/v1 header directory exists but lacks the standard headers
+# (e.g. <type_traits>) while the SDK copy is complete, point the compiler at
+# the complete SDK headers. Healthy toolchains are not touched.
+IF(APPLE
+   AND EXISTS "/Library/Developer/CommandLineTools/usr/include/c++/v1"
+   AND NOT EXISTS "/Library/Developer/CommandLineTools/usr/include/c++/v1/type_traits"
+   AND EXISTS "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/type_traits")
   SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -Wall -isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1")
 ELSE()
   SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -Wall")
@@ -158,6 +164,9 @@ IF($ENV{ENABLE_DEBUG})
   SET(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -Wall -g -ggdb")
   MESSAGE("** Enabled DebugMode")
 ENDIF($ENV{ENABLE_DEBUG})
+
+# register tests before any subdirectory calls add_test()
+enable_testing()
 
 add_subdirectory(./src/sef) #compile the silent eye framework
 

@@ -97,15 +97,20 @@ namespace SilentEye {
             }
 
             QString output = Controller::instance()->config.get("output");
-            m_logger.info("output directory: " + output);
-            m_logger.debug(output+md->shortName() + " == " + md->filePath());
+            // make sure the path ends with a separator, otherwise the guards below
+            // cannot detect that the destination equals the source file
+            QString outputDir = output;
+            if (!outputDir.endsWith("/") && !outputDir.endsWith("\\"))
+                outputDir += "/";
+            m_logger.info("output directory: " + outputDir);
+            m_logger.debug(outputDir+md->shortName() + " == " + md->filePath());
 
-            if (md->filePath().compare(output+md->shortName(), Qt::CaseInsensitive) == 0)
+            if (md->filePath().compare(outputDir+md->shortName(), Qt::CaseInsensitive) == 0)
             {
                 m_logger.error("Cannot save new file into source directory, please select an other destination!");
                 return 11;
             }
-            else if (QFile::exists(output+md->shortName()))
+            else if (QFile::exists(outputDir+md->shortName()))
             {
                 m_logger.error("Cannot save new file : destination file already exists !");
                 return 12;

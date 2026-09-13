@@ -107,13 +107,13 @@ namespace SilentEye {
             newVersionLabel->setText(conf.get("name"));
             dateLabel->setText(conf.get("date"));
             releaseBrowser->setText(conf.get("releasenote").trimmed());
-#if defined(Q_WS_WIN)
+#if defined(Q_OS_WIN)
             linkLabel->setText("<a href='" + conf.get("link-win") + "'>"
                                + conf.get("link-win") + "</a>");
-#elif defined(Q_WS_X11)
+#elif defined(Q_OS_LINUX)
             linkLabel->setText("<a href='" + conf.get("link-lin") + "'>"
                                + conf.get("link-lin") + "</a>");
-#elif defined(Q_WS_MAC)
+#elif defined(Q_OS_MAC)
             linkLabel->setText("<a href='" + conf.get("link-mac") + "'>"
                                + conf.get("link-mac") + "</a>");
 #else

@@ -74,7 +74,7 @@ namespace SilentEyeFramework {
         stream.readRawData(buffer, len); // ChunkID
         buffer[len] = '\0';
         QString identifier(buffer);
-        delete buffer;
+        delete[] buffer;
 
         if (identifier == "RIFF")
         {
@@ -99,11 +99,11 @@ namespace SilentEyeFramework {
         buffer[len] = '\0';
         if ("WAVE" != QString(buffer))
         {
-            delete buffer;
+            delete[] buffer;
             throw ModuleException("Selected file is not in a valid WAVE format.",
                                   "Format must be \"WAVE\"!");
         }
-        delete buffer;
+        delete[] buffer;
 
         // SUB CHUNK FMT
         buffer = new char[len+1];
@@ -113,9 +113,9 @@ namespace SilentEyeFramework {
         {
             throw ModuleException("Selected file is not in a valid WAVE format",
                                   "Subchunk1ID must be \"fmt \"!");
-            delete buffer;
+            delete[] buffer;
         }
-        delete buffer;
+        delete[] buffer;
 
         stream >> m_subFmtSize;
         stream >> m_audioFormat;
@@ -152,9 +152,9 @@ namespace SilentEyeFramework {
         {
             throw ModuleException("Selected file is not in a valid/supported WAVE format.",
                                   "Subchunk2ID mus be \"data\"!");
-            delete buffer;
+            delete[] buffer;
         }
-        delete buffer;
+        delete[] buffer;
 
         stream >> m_subDataSize;
 

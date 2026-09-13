@@ -9,3 +9,11 @@
 *.cmake
 *ui_*.h
 html-legacy
+
+# test suite outputs (QTest working directory is the source tree)
+src/**/testsuite/**/application.log
+src/**/testsuite/**/*.jpg
+src/**/testsuite/**/*.jpeg
+src/**/testsuite/**/*.bmp
+src/**/testsuite/**/_source*.wav
+src/**/testsuite/**/output.txt

@@ -78,6 +78,31 @@ Note: the batch encoder picks the format module from `silenteye.conf`
 * **i386 (32-bit)**: not supported. Modern macOS SDKs and Qt6 dropped 32-bit
   macOS entirely.
 
+# Continuous integration and releases
+
+GitHub Actions workflows live in `.github/workflows/`:
+
+* **`ci.yml`** builds on every push/PR:
+  * macOS arm64 (full build, plug-ins, test suite, batch round-trip smoke test),
+  * Windows x64 via MSYS2/MinGW (full build with plug-ins),
+  * Linux x64 (core compile check; the plug-ins additionally require a Qt6
+    build of QCA, which is not packaged by Ubuntu).
+* **`release.yml`** runs on `v*` tags and publishes a GitHub release with
+  `silenteye-macos-arm64.zip` and `silenteye-windows-x64.zip`.
+
+The Windows release bundle contains `silenteye.exe`, the plug-ins and the Qt
+runtime deployed with `windeployqt`. AES modules additionally need the QCA
+OpenSSL provider; the bundle is best-effort regarding QCA's plug-in search path.
+
+## Test suite
+
+The QTest suite is enabled with `ENABLE_TESTSUITE=1` and run with `ctest`.
+It compiles and runs cleanly except for the JPEG `manualProcess` cases that use
+the `BOTTOM` header position: those fail on the tiny repository fixtures
+because the header sits on the last JPEG row where compression artifacts are
+strongest. This is a known limitation of that header mode, so the CI test step
+is non-blocking.
+
 # How can i compile source code? on Ubuntu/Unix
 
 ## Requirments
@@ -261,7 +286,7 @@ Just use the run function of Qt Creator
 | CONFPATH_VALUE=/etc/silenteye | Change default configuration path (use /etc/silenteye/silenteye.conf and /etc/silenteye/version.xml) |
 | or CONFPATH_USERHOME=1 | Change default configuration path (use $HOME/.silenteye/silenteye.conf and $HOME/.silenteye/version.xml) |
 | LOGPATH_VALUE=/var/log/ | Change default log path (use /var/log/silenteye.log) |
-| or LOGPATH_USERHOME=1 | Change default log path (use $HOME/.silenteye/silenteye.log) | 
+| or LOGPATH_USERHOME=1 | Change default log path (use $HOME/.silenteye/silenteye.log) |
 | CMNPATH_VALUE=/usr/share/silenteye/ | Change default share path (use /usr/share/silenteye/version.xml) |
 | DOCPATH_VALUE=/usr/share/doc | Change default doc path (installation only) |
 | PIXPATH_VALUE=/usr/share/pixmaps | Change default pixmaps path (installation only) |

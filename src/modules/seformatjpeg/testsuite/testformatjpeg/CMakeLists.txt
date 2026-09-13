@@ -1,13 +1,10 @@
 PROJECT( testformatjpeg ) # the name of your project
 
-cmake_minimum_required(VERSION 2.6.0)
+cmake_minimum_required(VERSION 3.16)
 
-SET( QT_DONT_USE_QTGUI TRUE )
-SET( QT_USE_QTTEST TRUE )
 
-find_package(Qt4 REQUIRED) # find and setup Qt4 for this project
+find_package(Qt6 COMPONENTS Core Gui Widgets Test REQUIRED)
 
-INCLUDE(${QT_USE_FILE})
 
 SET(testformatjpeg_SRCS
   ../../imagejpeg.cpp
@@ -25,15 +22,11 @@ INCLUDE_DIRECTORIES(testformatjpeg ${CMAKE_BINARY_DIR} )
 INCLUDE_DIRECTORIES(testformatjpeg ${sef_SOURCE_DIR} )
 
 
-QT4_WRAP_CPP(testformatjpeg_MOC_SRCS ${testformatjpeg_MOC_HDRS})
 
-LINK_LIBRARIES( testformatjpeg sef)
-ADD_EXECUTABLE( testformatjpeg ${testformatjpeg_SRCS} ${testformatjpeg_MOC_SRCS} )
+ADD_EXECUTABLE( testformatjpeg ${testformatjpeg_SRCS} ${testformatjpeg_MOC_HDRS} )
 
-TARGET_LINK_LIBRARIES(testformatjpeg ${QT_LIBRARIES})
+target_link_libraries(testformatjpeg sef Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Test)
 
-IF(WIN32)
-	ADD_CUSTOM_COMMAND(TARGET testformatjpeg POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libsef.dll .
-	)
-ENDIF(WIN32)
+
+add_test(NAME testformatjpeg COMMAND testformatjpeg)
+set_tests_properties(testformatjpeg PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")

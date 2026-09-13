@@ -1,0 +1,140 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # macOS (Apple Silicon)
+  # ---------------------------------------------------------------------------
+  macos:
+    name: macOS arm64
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake ninja qtbase qtmultimedia qca
+
+      - name: Configure
+        env:
+          ENABLE_MODULE: "1"
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package application bundle
+        run: |
+          set -euo pipefail
+          APP="build/silenteye.app"
+          cp build/libsef.dylib "$APP/Contents/MacOS/"
+
+          # bundle the Qt frameworks used by the executable and the plug-ins
+          EXTRA=""
+          for lib in "$APP"/Contents/MacOS/modules/*.dylib; do
+            EXTRA="$EXTRA -executable=$lib"
+          done
+          macdeployqt "$APP" -always-overwrite $EXTRA
+
+          ditto -c -k --keepParent "$APP" silenteye-macos-arm64.zip
+          ls -lh silenteye-macos-arm64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: silenteye-macos-arm64
+          path: silenteye-macos-arm64.zip
+
+  # ---------------------------------------------------------------------------
+  # Windows (x64, MSYS2/MinGW)
+  # ---------------------------------------------------------------------------
+  windows:
+    name: Windows x64
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-qt6-base
+            mingw-w64-x86_64-qt6-multimedia
+            mingw-w64-x86_64-qt6-5compat
+            mingw-w64-x86_64-qca-qt6
+            zip
+
+      - name: Configure
+        run: ENABLE_MODULE=1 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package application
+        run: |
+          set -euo pipefail
+          DIST="dist/silenteye"
+          rm -rf dist
+          mkdir -p "$DIST/modules" "$DIST/crypto"
+
+          cp build/silenteye.exe          "$DIST/"
+          cp build/libsef.dll             "$DIST/"
+          cp build/*.conf build/version.xml "$DIST/"
+          cp build/modules/*.dll          "$DIST/modules/"
+
+          # QCA runtime + crypto provider plug-ins
+          cp /mingw64/bin/libqca-qt6*.dll "$DIST/" || true
+          cp /mingw64/share/qt6/plugins/crypto/*.dll "$DIST/crypto/" || true
+          cp /mingw64/bin/libssl-*.dll /mingw64/bin/libcrypto-*.dll "$DIST/" || true
+
+          # make Qt look for plug-ins next to the executable as well
+          printf '[Paths]\nPlugins = .\n' > "$DIST/qt.conf"
+
+          # deploy the Qt runtime
+          if command -v windeployqt6 >/dev/null 2>&1; then WD=windeployqt6; else WD=windeployqt; fi
+          "$WD" --release --no-translations --no-compiler-runtime "$DIST/silenteye.exe"
+
+          cd dist && zip -r ../silenteye-windows-x64.zip silenteye
+          ls -lh ../silenteye-windows-x64.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: silenteye-windows-x64
+          path: silenteye-windows-x64.zip
+
+  # ---------------------------------------------------------------------------
+  # Publish a GitHub release with all binaries
+  # ---------------------------------------------------------------------------
+  release:
+    name: Publish release
+    needs: [macos, windows]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Show artifacts
+        run: find artifacts -type f -maxdepth 2 -exec ls -lh {} \;
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true

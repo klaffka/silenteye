@@ -1,13 +1,10 @@
 PROJECT( testformatbmp ) # the name of your project
 
-cmake_minimum_required(VERSION 2.6.0)
+cmake_minimum_required(VERSION 3.16)
 
-SET( QT_DONT_USE_QTGUI TRUE )
-SET( QT_USE_QTTEST TRUE )
 
-find_package(Qt4 REQUIRED) # find and setup Qt4 for this project
+find_package(Qt6 COMPONENTS Core Gui Widgets Test REQUIRED)
 
-INCLUDE(${QT_USE_FILE})
 
 SET(testformatbmp_SRCS
   ../imagebmp.cpp
@@ -21,15 +18,11 @@ SET(testformatbmp_MOC_HDRS
 INCLUDE_DIRECTORIES(testformatbmp ${CMAKE_BINARY_DIR} )
 INCLUDE_DIRECTORIES(testformatbmp ${sef_SOURCE_DIR} )
 
-QT4_WRAP_CPP(testformatbmp_MOC_SRCS ${testformatbmp_MOC_HDRS})
 
-LINK_LIBRARIES( testformatbmp sef)
-ADD_EXECUTABLE( testformatbmp ${testformatbmp_SRCS} ${testformatbmp_MOC_SRCS} )
+ADD_EXECUTABLE( testformatbmp ${testformatbmp_SRCS} ${testformatbmp_MOC_HDRS} )
 
-TARGET_LINK_LIBRARIES(testformatbmp ${QT_LIBRARIES}) 
+target_link_libraries(testformatbmp sef Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Test)
 
-IF(WIN32)
-	ADD_CUSTOM_COMMAND(TARGET testformatbmp POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libsef.dll .
-	)
-ENDIF(WIN32)
+
+add_test(NAME testformatbmp COMMAND testformatbmp)
+set_tests_properties(testformatbmp PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
