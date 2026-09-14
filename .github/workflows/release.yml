@@ -66,8 +66,40 @@ jobs:
             exit 1
           fi
 
-          ditto -c -k --keepParent "$APP" silenteye-macos-arm64.zip
+          # plain zip (not `ditto -c -k`) so the archive works with every
+          # extraction tool (unzip, Finder, 7z, Windows). `-y` keeps the
+          # framework symlinks as links instead of duplicating the payload.
+          # Note: macOS stores the ad-hoc signature of plain data files
+          # (.conf, .xml) in extended attributes, which no zip format
+          # survives - this is expected and does not affect runtime.
+          (cd build && zip -r -X -y -q ../silenteye-macos-arm64.zip silenteye.app)
           ls -lh silenteye-macos-arm64.zip
+
+          # guard: the archive must round-trip through `unzip` and the app
+          # must actually run from the extracted bundle
+          TESTDIR="$(mktemp -d)"
+          unzip -q silenteye-macos-arm64.zip -d "$TESTDIR"
+          BIN="$TESTDIR/silenteye.app/Contents/MacOS/silenteye"
+          T="$TESTDIR/run"; CONF="$T/conf"; OUT="$T/out"; mkdir -p "$CONF" "$OUT"
+          python3 - "$T/test.bmp" <<'PY'
+import struct, sys
+w = h = 256
+row = b''.join(bytes((x % 256, (x * 3) % 256, (x * 7) % 256)) for x in range(w))
+row += b'\x00' * ((4 - (w * 3) % 4) % 4)
+pixels = row * h
+size = 54 + len(pixels)
+with open(sys.argv[1], 'wb') as f:
+    f.write(b'BM' + struct.pack('<IHHI', size, 0, 0, 54))
+    f.write(struct.pack('<IiiHHIIiiII', 40, w, h, 1, 24, 0, len(pixels), 2835, 2835, 0, 0))
+    f.write(pixels)
+PY
+          sed -e 's#<imageformat>JPEG</imageformat>#<imageformat>BMP</imageformat>#' \
+              -e "s#<output></output>#<output>$OUT/</output>#" \
+              silenteye.conf > "$CONF/silenteye.conf"
+          "$BIN" --batch encode "$T/test.bmp" --message "release-smoke" --confpath "$CONF"
+          "$BIN" --batch decode "$OUT/test.bmp" --confpath "$CONF" 2>&1 | grep -q "Decoded message: release-smoke"
+          echo "unzip round-trip smoke test passed"
+          rm -rf "$TESTDIR"
 
       - uses: actions/upload-artifact@v4
         with:
