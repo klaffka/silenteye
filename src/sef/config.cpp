@@ -169,6 +169,7 @@ namespace SilentEyeFramework {
         QFile file;
 
         QXmlStreamReader xml;
+        bool rootSeen = false;
         if (!m_content.isEmpty()) {
             buffer.setData(m_content.toUtf8());
             buffer.open(QIODevice::ReadOnly);
@@ -189,9 +190,14 @@ namespace SilentEyeFramework {
         while(!xml.atEnd())
         {
             xml.readNext();
-            if(xml.isStartElement()
-               && xml.name() != QLatin1String("configuration"))
+            if(xml.isStartElement())
             {
+                // skip the root element (e.g. <configuration> or <version>)
+                if(!rootSeen)
+                {
+                    rootSeen = true;
+                    continue;
+                }
                 m_valueMap[xml.name().toString()] = xml.readElementText();
             }
         }

@@ -18,6 +18,7 @@
 
 #include <QtWidgets>
 #include "ui_aboutdialog.h"
+#include "config.h"
 
 namespace SilentEye {
 
@@ -27,7 +28,19 @@ namespace SilentEye {
         Q_OBJECT;
 
     public:
-    AboutDialog(QWidget* parent=0) : QDialog(parent){ setupUi(this); }
+    AboutDialog(QWidget* parent=0) : QDialog(parent)
+    {
+        setupUi(this);
+
+        // version comes from version.xml shipped next to the executable;
+        // fall back to the compiled-in version
+        QString version = QString::fromLatin1(SILENTEYE_VERSION);
+        SilentEyeFramework::Config conf(QCoreApplication::applicationDirPath() + "/",
+                                        "version.xml", true);
+        if (!conf.get("name").isEmpty())
+            version = conf.get("name");
+        versionLabel_2->setText(version);
+    }
 
     };
 
