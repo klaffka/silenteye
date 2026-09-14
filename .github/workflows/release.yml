@@ -82,17 +82,17 @@ jobs:
           BIN="$TESTDIR/silenteye.app/Contents/MacOS/silenteye"
           T="$TESTDIR/run"; CONF="$T/conf"; OUT="$T/out"; mkdir -p "$CONF" "$OUT"
           python3 - "$T/test.bmp" <<'PY'
-import struct, sys
-w = h = 256
-row = b''.join(bytes((x % 256, (x * 3) % 256, (x * 7) % 256)) for x in range(w))
-row += b'\x00' * ((4 - (w * 3) % 4) % 4)
-pixels = row * h
-size = 54 + len(pixels)
-with open(sys.argv[1], 'wb') as f:
-    f.write(b'BM' + struct.pack('<IHHI', size, 0, 0, 54))
-    f.write(struct.pack('<IiiHHIIiiII', 40, w, h, 1, 24, 0, len(pixels), 2835, 2835, 0, 0))
-    f.write(pixels)
-PY
+          import struct, sys
+          w = h = 256
+          row = b''.join(bytes((x % 256, (x * 3) % 256, (x * 7) % 256)) for x in range(w))
+          row += b'\x00' * ((4 - (w * 3) % 4) % 4)
+          pixels = row * h
+          size = 54 + len(pixels)
+          with open(sys.argv[1], 'wb') as f:
+              f.write(b'BM' + struct.pack('<IHHI', size, 0, 0, 54))
+              f.write(struct.pack('<IiiHHIIiiII', 40, w, h, 1, 24, 0, len(pixels), 2835, 2835, 0, 0))
+              f.write(pixels)
+          PY
           sed -e 's#<imageformat>JPEG</imageformat>#<imageformat>BMP</imageformat>#' \
               -e "s#<output></output>#<output>$OUT/</output>#" \
               silenteye.conf > "$CONF/silenteye.conf"
