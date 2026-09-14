@@ -2,7 +2,7 @@ PROJECT( silenteye )
 
 cmake_minimum_required(VERSION 3.16)
 
-find_package(Qt6 COMPONENTS Core Gui Widgets Network Concurrent Multimedia Core5Compat REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Network Concurrent Multimedia REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -91,7 +91,6 @@ TARGET_LINK_LIBRARIES(silenteye
     Qt6::Widgets
     Qt6::Network
     Qt6::Multimedia
-    Qt6::Core5Compat
 )
 
 IF(STATIC_LIBRARY_FLAGS)

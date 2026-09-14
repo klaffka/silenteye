@@ -90,10 +90,12 @@ GitHub Actions workflows live in `.github/workflows/`:
 * **`release.yml`** runs on `v*` tags and publishes a GitHub release with
   `silenteye-macos-arm64.zip` and `silenteye-windows-x64.zip`.
 
-The macOS release intentionally does not bundle QCA. BMP, JPEG and WAV
-steganography work without extra dependencies; AES is enabled only when a
-compatible system QCA/OpenSSL provider is installed. Without it, the AES
-plug-ins are skipped and the rest of the application remains usable.
+The macOS release ships without the AES plug-ins: Homebrew's QCA keeps a
+compiled-in provider directory pointing at its own install location, so
+bundling it makes QCA load a second, mismatching provider on systems that have
+QCA installed and crash. BMP, JPEG and WAV steganography work without extra
+dependencies. AES is included in the Windows release and is available on macOS
+when building from source against a system QCA (`brew install qca`).
 
 The Windows release bundle contains `silenteye.exe`, the plug-ins, QCA/OpenSSL
 and the Qt runtime deployed with `windeployqt`.

@@ -2,7 +2,7 @@ PROJECT( sef )
 
 cmake_minimum_required(VERSION 3.16)
 
-find_package(Qt6 COMPONENTS Core Gui Widgets Multimedia Concurrent Core5Compat REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Multimedia Concurrent REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -37,7 +37,6 @@ TARGET_LINK_LIBRARIES(sef PUBLIC
     Qt6::Network
     Qt6::Concurrent
     Qt6::Multimedia
-    Qt6::Core5Compat
 )
 
 if($ENV{ENABLE_TESTSUITE})

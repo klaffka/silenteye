@@ -38,29 +38,30 @@ jobs:
           APP="build/silenteye.app"
           cp build/libsef.dylib "$APP/Contents/MacOS/"
 
-          # macOS intentionally does not bundle QCA. AES is optional and is
-          # enabled only when a compatible system QCA/OpenSSL provider exists.
-          # Do not pass the AES modules to macdeployqt: keeping their QCA
-          # dependency external prevents two QCA installations being loaded.
+          # macOS intentionally ships without the AES plug-ins. Homebrew's QCA
+          # keeps a compiled-in provider directory pointing at its own install
+          # location, so bundling it would make QCA load a second, mismatching
+          # provider on systems that have QCA installed and crash. The BMP/JPEG/
+          # WAV modules cover the steganography features. AES is available in
+          # the Windows bundle and in source builds that link a system QCA.
+          rm -f "$APP/Contents/MacOS/modules/libsecryptoaes.dylib" \
+                "$APP/Contents/MacOS/modules/libsecryptoaes256.dylib"
+
+          # bundle the Qt runtime used by the executable and the format plug-ins
           EXTRA=""
-          for lib in "$APP"/Contents/MacOS/modules/libseformatbmp.dylib \
-                     "$APP"/Contents/MacOS/modules/libseformatjpeg.dylib \
-                     "$APP"/Contents/MacOS/modules/libseformatwav.dylib; do
+          for lib in "$APP"/Contents/MacOS/modules/*.dylib; do
             EXTRA="$EXTRA -executable=$lib"
           done
           macdeployqt "$APP" -always-overwrite $EXTRA || true
 
-          # macdeployqt rewrites install names (invalidating signatures) and
-          # reports an error doing so; re-sign the whole bundle ad-hoc
+          # macdeployqt rewrites install names (invalidating signatures), so
+          # re-sign the whole bundle ad-hoc
           codesign --force --deep --sign - "$APP"
-          codesign --verify --deep "$APP"
+          codesign --verify "$APP"
 
-          # Non-crypto modules must not retain build-machine paths.
-          FILES=("$APP/Contents/MacOS/silenteye" \
-                 "$APP/Contents/MacOS/modules/libseformatbmp.dylib" \
-                 "$APP/Contents/MacOS/modules/libseformatjpeg.dylib" \
-                 "$APP/Contents/MacOS/modules/libseformatwav.dylib")
-          if otool -L "${FILES[@]}" | grep -q "/opt/homebrew"; then
+          # no build-machine paths may remain in the bundle
+          if otool -L "$APP/Contents/MacOS/silenteye" \
+                     "$APP/Contents/MacOS/modules/"*.dylib | grep -q "/opt/homebrew"; then
             echo "ERROR: bundle still references Homebrew paths" >&2
             exit 1
           fi
