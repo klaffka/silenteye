@@ -184,6 +184,14 @@ int main(int argc, char *argv[])
     
     Logger::setLevel(Controller::instance()->config.get("loglevel"));
 
+    // Prefer crypto providers bundled next to the application (release
+    // bundles ship them in a "crypto" directory). Without this, QCA might
+    // load a provider installed system-wide that links a different QCA
+    // library, which crashes on use.
+    const QString bundledCryptoPath = qApp->applicationDirPath() + "/crypto";
+    if (QDir(bundledCryptoPath).exists())
+        qputenv("QCA_PLUGIN_PATH", bundledCryptoPath.toUtf8());
+
     ModuleManager::load();
 
     if (arguments.size() <= 1)
