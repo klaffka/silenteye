@@ -90,9 +90,13 @@ GitHub Actions workflows live in `.github/workflows/`:
 * **`release.yml`** runs on `v*` tags and publishes a GitHub release with
   `silenteye-macos-arm64.zip` and `silenteye-windows-x64.zip`.
 
-The Windows release bundle contains `silenteye.exe`, the plug-ins and the Qt
-runtime deployed with `windeployqt`. AES modules additionally need the QCA
-OpenSSL provider; the bundle is best-effort regarding QCA's plug-in search path.
+The macOS release intentionally does not bundle QCA. BMP, JPEG and WAV
+steganography work without extra dependencies; AES is enabled only when a
+compatible system QCA/OpenSSL provider is installed. Without it, the AES
+plug-ins are skipped and the rest of the application remains usable.
+
+The Windows release bundle contains `silenteye.exe`, the plug-ins, QCA/OpenSSL
+and the Qt runtime deployed with `windeployqt`.
 
 ## Test suite
 
